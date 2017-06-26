@@ -290,6 +290,29 @@ aData['rateNOx'].sort_values(ascending=False)
 
 count(aData['rateNOx']>50)
 
+#################################################
+betaData = aData.where(aData['rateNOx']>50)
+betaData = betaData.dropna(axis=0)
+betaData.isnull().sum()
+
+feature_cols = ['FIC220', 'FIC201', 'FIC221']
+X = betaData[feature_cols]
+y = betaData.rateNOx
+
+
+plt.plot(aData['rateNOx'])
+# follow the usual sklearn pattern: import, instantiate, fit
+
+lm = LinearRegression()
+lm.fit(X, y)
+
+# print intercept and coefficients
+print(lm.intercept_)
+print(lm.coef_)
+zip(feature_cols, lm.coef_)
+lm.score(X, y)
+
+
 ########################################################
 
 
