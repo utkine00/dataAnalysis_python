@@ -11,7 +11,8 @@ from sklearn.cluster import KMeans
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
 from sklearn import metrics
-
+import seaborn as sns
+from sklearn.linear_model import LinearRegression
 
 #1. Read File
 ###.Please input path for the 'dataset.tsv' ###
@@ -36,13 +37,97 @@ plt.figure(figsize=(28,140))
 plt.scatter(aData['STEAM'], aData['NOX'])
 plt.plot(aData['STEAM'])
 plt.plot(aData['NOX'])
+#rateNOx = (aData['NOX']/aData['STEAM'])*100
 
 plt.plot(aData['NOX']/aData['STEAM'])
 plt.plot((aData['STEAM']-aData['NOX'])/aData['STEAM'])
 
-plt.plot(aData['FIC220'])
-plt.plot(aData['FIC201'])
-plt.plot(aData['FIC221'])
+plt.plot(aData['FIC220'], label = 'FIC220')
+plt.plot(aData['FIC201'], label = 'FIC201')
+plt.plot(aData['FIC221'], label = 'FIC221')
+plt.plot(aData['FIC220']+aData['FIC201']+aData['FIC221'])
+plt.legend()
+plt.show()
+
+aData.corr()
+targetData.corr()
+corrDF = aData.corr()
+corrDF['NOX']
+corrDF['NOX'].sort_values(ascending=False)
+
+aData["rateNOx"] = (aData['NOX']/aData['STEAM'])*100
+corrDF['rateNOx'].sort_values(ascending=False)
+
+
+
+sumOfGas = aData['FIC220']+aData['FIC201']+ aData['FIC221']
+plt.plot(sumOfGas)
+plt.plot(aData['NOX']/aData['STEAM'])
+plt.plot(aData['NOX']/(aData['STEAM']+aData['NOX']))
+plt.plot(aData['STEAM'])
+plt.plot(aData['NOX'])
+plt.scatter(aData['NOX'],sumOfGas)
+
+plt.plot(aData['FIC221']/sumOfGas, label = 'Rate(FIC221)')
+plt.plot(aData['FIC201']/sumOfGas, label = 'Rate(FIC201)')
+plt.plot(aData['FIC220']/sumOfGas, label = 'Rate(FIC220)')
+plt.plot(aData['NOX']/aData['STEAM'], label = 'Rate(NOX)')
+plt.legend()
+plt.show()
+
+plt.plot(aData['FI694'])
+plt.plot(aData['FI794'])
+plt.plot(aData['FI894'])
+plt.plot(aData['FC994'])
+sumfuel = aData['FI694']+ aData['FI794']+ aData['FI894']+aData['FC994']
+plt.plot(sumfuel)
+
+plt.plot(aData['FIC221']/sumOfGas, label = 'Rate(FIC221)')
+plt.plot(aData['FIC201']/sumOfGas, label = 'Rate(FIC201)')
+plt.plot(aData['FIC220']/sumOfGas, label = 'Rate(FIC220)')
+plt.plot(aData['NOX']/aData['STEAM'], label = 'Rate(NOX)')
+plt.plot(sumfuel, label = 'sumfuel')
+plt.legend()
+plt.show()
+
+
+plt.plot(aData['FC691'])
+plt.plot(aData['FC791'])
+plt.plot(aData['FC891'])
+plt.plot(aData['FC991'])
+feedWT = aData['FC691']+ aData['FC791']+ aData['FC891']+aData['FC991']
+plt.plot(feedWT)
+plt.plot(aData['STEAM'])
+plt.plot(aData['NOX'])
+plt.plot(aData['STEAM']-feedWT)
+plt.plot(aData['STEAM']+aData['NOX'], label = 'SUM')
+plt.plot(feedWT, label = 'feedWT')
+plt.legend()
+plt.show()
+plt.plot(aData['STEAM']/feedWT)
+
+
+aData["steamWT"] = aData['STEAM']/feedWT
+
+
+plt.plot(aData['PI691'])
+plt.plot(aData['PI791'])
+plt.plot(aData['PI891'])
+plt.plot(aData['PI991'])
+feedWTPre = aData['PI691']+ aData['PI791']+ aData['PI891']+aData['PI991']
+
+plt.plot(aData['TI691'])
+plt.plot(aData['TI791'])
+plt.plot(aData['TI891'])
+plt.plot(aData['TI991'])
+feedWTTem = aData['TI691']+ aData['TI791']+ aData['TI891']+aData['TI991']
+
+plt.plot(aData['FC691'])
+plt.plot(aData['FC791'])
+plt.plot(aData['FC891'])
+plt.plot(aData['FC991'])
+feedWT = aData['FC691']+ aData['FC791']+ aData['FC891']+aData['FC991']
+
 
 
 plt.subplot(1, 3, 1)
@@ -120,13 +205,93 @@ for i in range(len(aData.columns)):
 plt.show()
 
 
+########################################################
+# Feature selection
+drop_elements = ['TI697', 'FI694', 'PI697',
+       'PI699', 'TI698', 'FQ695', 'PC698', 'PDI691', 'FI698', 'TI720', 'PI693',
+       'TI693', 'PI694', 'FI693', 'TI694', 'PI695', 'FC691', 'PI691', 'TI691',
+       'LC691', 'PI692', 'TI797', 'FI794', 'PI797', 'PI799', 'TI798', 'FQ795',
+       'PC798', 'PDI791', 'FI798', 'TI820', 'PI793', 'TI793', 'PI794', 'FI793',
+       'TI794', 'PI795', 'FC791', 'PI791', 'TI791', 'LC791', 'PI792', 'TI897',
+       'FI894', 'PI897', 'PI899', 'TI898', 'FQ895', 'PC898', 'PDI891', 'FI898',
+       'TI920', 'PI893', 'TI893', 'PI894', 'FI893', 'TI894', 'PI895', 'FC891',
+       'PI891', 'TI891', 'LC891', 'PI892', 'TI910', 'FC994', 'PI997', 'PI999',
+       'TI998', 'FC995', 'PI998', 'PDC991', 'PI993', 'TI993', 'PI994', 'FI993',
+       'TI994', 'PI995', 'FC991', 'PI991', 'TI991', 'LC991', 'PI990']
+targetData = aData.drop(drop_elements, axis = 1)
 
+drop_elements = ['TI697', 'PI697',
+       'PI699', 'TI698', 'FQ695', 'PC698', 'PDI691', 'FI698', 'TI720', 'PI693',
+       'TI693', 'PI694', 'FI693', 'TI694', 'PI695', 'FC691', 'PI691', 'TI691',
+       'LC691', 'PI692', 'TI797', 'PI797', 'PI799', 'TI798', 'FQ795',
+       'PC798', 'PDI791', 'FI798', 'TI820', 'PI793', 'TI793', 'PI794', 'FI793',
+       'TI794', 'PI795', 'FC791', 'PI791', 'TI791', 'LC791', 'PI792', 'TI897',
+       'PI897', 'PI899', 'TI898', 'FQ895', 'PC898', 'PDI891', 'FI898',
+       'TI920', 'PI893', 'TI893', 'PI894', 'FI893', 'TI894', 'PI895', 'FC891',
+       'PI891', 'TI891', 'LC891', 'PI892', 'TI910', 'PI997', 'PI999',
+       'TI998', 'FC995', 'PI998', 'PDC991', 'PI993', 'TI993', 'PI994', 'FI993',
+       'TI994', 'PI995', 'FC991', 'PI991', 'TI991', 'LC991', 'PI990']
+targetData = aData.drop(drop_elements, axis = 1)
+########################################################
+#corr
+colormap = plt.cm.viridis
+plt.figure(figsize=(10 ,10))
+plt.title('Correlation of Features', y=1.05, size=15)
+sns.heatmap(targetData.corr(),linewidths=0.1,vmax=1.0, square=True, cmap=colormap, linecolor='white', annot=True)
 
-
-
+########################################################
+sns.set(style='whitegrid', context = 'notebook')
+cols = ['STEAM', 'NOX', 'rateNOx']
+sns.pairplot(aData[cols], size = 3, kind='reg')
+plt.show()
 
 
 ########################################################
+
+for i in range(len(aData.FIC201)):
+    if aData.FIC201[i] < 10:
+       aData.FIC201[i] = '0'
+      # print(job[i])
+    else:
+        pass
+    i += 1
+
+for i in range(len(aData.FIC220)):
+    if aData.FIC220[i] < 10:
+       aData.FIC220[i] = '0'
+      # print(job[i])
+    else:
+        pass
+    i += 1
+
+# create X and y
+feature_cols = ['FIC220', 'FIC201', 'FIC221']
+X = aData[feature_cols]
+y = aData.rateNOx
+
+
+plt.plot(aData['rateNOx'])
+# follow the usual sklearn pattern: import, instantiate, fit
+
+lm = LinearRegression()
+lm.fit(X, y)
+
+# print intercept and coefficients
+print(lm.intercept_)
+print(lm.coef_)
+zip(feature_cols, lm.coef_)
+lm.score(X, y)
+
+
+aData = aData.dropna(axis=0)
+aData.isnull().sum()
+
+aData['rateNOx'].sort_values(ascending=False)
+
+count(aData['rateNOx']>50)
+
+########################################################
+
 
 plt.figure()
 plt.subplots_adjust(hspace=1.5, figsize=(30,20))
