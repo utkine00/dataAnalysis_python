@@ -291,9 +291,10 @@ aData['rateNOx'].sort_values(ascending=False)
 count(aData['rateNOx']>50)
 
 #################################################
-betaData = aData.where(aData['rateNOx']>50)
+betaData = aData.where(aData['rateNOx']<40)
 betaData = betaData.dropna(axis=0)
 betaData.isnull().sum()
+betaData.info()
 
 feature_cols = ['FIC220', 'FIC201', 'FIC221']
 X = betaData[feature_cols]
@@ -301,6 +302,7 @@ y = betaData.rateNOx
 
 
 plt.plot(aData['rateNOx'])
+plt.plot(betaData['rateNOx'])
 # follow the usual sklearn pattern: import, instantiate, fit
 
 lm = LinearRegression()
