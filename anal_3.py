@@ -5,12 +5,8 @@ Created on Wed Jun 28 08:56:04 2017
 @author: admin
 """
 
-import numpy as np
 from matplotlib import pyplot as plt
-from sklearn.cluster import KMeans
 import pandas as pd
-from sklearn.preprocessing import StandardScaler
-from sklearn import metrics
 import seaborn as sns
 from sklearn.linear_model import LinearRegression
 
@@ -28,8 +24,31 @@ aData.columns
 aData.isnull().sum()
 aData = aData.dropna(axis=0)
 
+#3. data preprocessing
+
+for i in range(len(aData.FIC201)):
+    if aData.FIC201[i] < 10:
+       aData.FIC201[i] = '0'
+    else:
+        pass
+    i += 1
+
+for i in range(len(aData.FIC220)):
+    if aData.FIC220[i] < 10:
+       aData.FIC220[i] = '0'
+    else:
+        pass
+    i += 1
+
+for i in range(len(aData.FIC221)):
+    if aData.FIC221[i] < 10:
+       aData.FIC221[i] = '0'
+    else:
+        pass
+    i += 1
+
+    
 aData["rateNOx"] = (aData['NOX']/aData['STEAM'])*100
-(aData['NOX']/aData['STEAM']).sort_values(ascending=False)
 
 betaData = aData.where( aData["rateNOx"] < 60 )
 betaData = betaData.dropna(axis=0)
@@ -38,25 +57,6 @@ betaData = betaData.dropna(axis=0)
 betaData.info()
 betaData.describe()
 
-
-steamSortData = betaData.sort_values('STEAM', inplace=False)
-steamSortData = steamSortData.reset_index()
-steamSortData.head()
-plt.figure(figsize=(20,10))
-plt.plot(steamSortData['STEAM'])
-plt.plot(steamSortData['NOX'])   
-plt.plot(steamSortData['rateNOx'])
-plt.plot(steamSortData['FIC220'], label = 'FIC220')
-plt.plot(steamSortData['FIC201'], label = 'FIC201')
-plt.plot(steamSortData['FIC221'], label = 'FIC221')
-plt.figure(figsize=(20,10))
-plt.plot(steamSortData['FIC220']+steamSortData['FIC201']+steamSortData['FIC221'])
-plt.legend()
-plt.show()
-
-
-
-
 betaData.loc[ betaData['rateNOx'] <= 41.109631, 'lvlOfNOx'] = 0
 betaData.loc[(betaData['rateNOx'] > 41.109631) & (betaData['rateNOx'] <= 47.148855), 'lvlOfNOx'] = 1
 betaData.loc[(betaData['rateNOx'] > 47.148855) & (betaData['rateNOx'] <= 49.659183), 'lvlOfNOx'] = 2
@@ -64,8 +64,42 @@ betaData.loc[betaData['rateNOx'] > 49.659183, 'lvlOfNOx'] = 3
 
 betaData['lvlOfNOx'].hist(bins=70)
 
-lvl1.describe()
-lvl2.describe()
+
+group0 = betaData.where( betaData['lvlOfNOx'] == 0 )
+group0 = group0.dropna(axis=0)
+group0 = group0.reset_index()
+
+group1 = betaData.where( betaData['lvlOfNOx'] == 1 )
+group1 = group1.dropna(axis=0)
+group1 = group1.reset_index()
+
+group2 = betaData.where( betaData['lvlOfNOx'] == 2 )
+group2 = group2.dropna(axis=0)
+group2 = group2.reset_index()
+
+group3 = betaData.where( betaData['lvlOfNOx'] == 3 )
+group3 = group3.dropna(axis=0)
+group3 = group3.reset_index()
+
+plt.subplot(2, 2, 1)
+plt.plot(group0['FIC220'], label = 'FIC220')
+plt.plot(group0['FIC201'], label = 'FIC201')
+plt.plot(group0['FIC221'], label = 'FIC221')
+plt.subplot(2, 2, 2)
+plt.plot(group1['FIC220'], label = 'FIC220')
+plt.plot(group1['FIC201'], label = 'FIC201')
+plt.plot(group1['FIC221'], label = 'FIC221')
+plt.subplot(2, 2, 3)
+plt.plot(group2['FIC220'], label = 'FIC220')
+plt.plot(group2['FIC201'], label = 'FIC201')
+plt.plot(group2['FIC221'], label = 'FIC221');
+plt.subplot(2, 2, 4)
+plt.plot(group3['FIC220'], label = 'FIC220')
+plt.plot(group3['FIC201'], label = 'FIC201')
+plt.plot(group3['FIC221'], label = 'FIC221')
+plt.legend()
+plt.show()
+
 lvl1 = betaData.where( betaData['rateNOx'] <= 41.109631 )
 lvl1 = lvl1.dropna(axis=0)
 lvl1 = lvl1.reset_index()
@@ -86,25 +120,11 @@ plt.plot(lvl2['FIC221'], label = 'FIC221')
 plt.legend()
 plt.show()
 
-feature_cols = ['FIC220', 'FIC201', 'FIC221']
-X = lvl1[feature_cols]
-y = lvl1.rateNOx
-
-plt.figure(figsize=(15,7))
-plt.subplot(1, 2, 1)
-plt.plot(lvl1['rateNOx'], label = 'lvl1')
-plt.subplot(1, 2, 2)
-plt.plot(lvl2['rateNOx'], label = 'lvl2')
-
-
-plt.plot(aData['rateNOx'])
-# follow the usual sklearn pattern: import, instantiate, fit
+lvl1.describe()
+lvl2.describe()
 
 
 
-group201.describe()
-
-group201_2.describe()
 group201_2 = betaData.where( betaData['FIC201'] >= 458.995622 )
 group201_2 = group201_2.dropna(axis=0)
 group201_2 = group201_2.reset_index()
@@ -112,6 +132,9 @@ group201_2 = group201_2.reset_index()
 group201 = betaData.where( betaData['FIC201'] < 458.995622 )
 group201 = group201.dropna(axis=0)
 group201 = group201.reset_index()
+
+group201.describe()
+group201_2.describe()
 
 plt.figure(figsize=(15,7))
 plt.subplot(1, 2, 1)
@@ -144,50 +167,48 @@ plt.plot(group201['FIC221'], label = 'FIC221')
 plt.legend()
 plt.show()
 
-group0 = betaData.where( betaData['lvlOfNOx'] == 0 )
-group0 = group0.dropna(axis=0)
-group0 = group0.reset_index()
 
-group1 = betaData.where( betaData['lvlOfNOx'] == 1 )
-group1 = group1.dropna(axis=0)
-group1 = group1.reset_index()
-
-group2 = betaData.where( betaData['lvlOfNOx'] == 2 )
-group2 = group2.dropna(axis=0)
-group2 = group2.reset_index()
-
-group3 = betaData.where( betaData['lvlOfNOx'] == 3 )
-group3 = group3.dropna(axis=0)
-group3 = group3.reset_index()
-
-plt.plot(group0['STEAM'])
-plt.plot(group0['NOX'])   
-plt.plot(group3['rateNOx'])
-plt.plot(group0['FIC220'], label = 'FIC220')
-plt.plot(group0['FIC201'], label = 'FIC201')
-plt.plot(group0['FIC221'], label = 'FIC221')
-#plt.plot(aData['FIC220']+aData['FIC201']+aData['FIC221'])
+steamSortData = betaData.sort_values('STEAM', inplace=False)
+steamSortData = steamSortData.reset_index()
+steamSortData.head()
+plt.figure(figsize=(20,10))
+plt.plot(steamSortData['STEAM'])
+plt.plot(steamSortData['NOX'])   
+plt.plot(steamSortData['rateNOx'])
+plt.plot(steamSortData['FIC220'], label = 'FIC220')
+plt.plot(steamSortData['FIC201'], label = 'FIC201')
+plt.plot(steamSortData['FIC221'], label = 'FIC221')
+plt.figure(figsize=(20,10))
+plt.plot(steamSortData['FIC220']+steamSortData['FIC201']+steamSortData['FIC221'])
 plt.legend()
 plt.show()
 
-plt.subplot(2, 2, 1)
-plt.plot(group0['FIC220'], label = 'FIC220')
-plt.plot(group0['FIC201'], label = 'FIC201')
-plt.plot(group0['FIC221'], label = 'FIC221')
-plt.subplot(2, 2, 2)
-plt.plot(group1['FIC220'], label = 'FIC220')
-plt.plot(group1['FIC201'], label = 'FIC201')
-plt.plot(group1['FIC221'], label = 'FIC221')
-plt.subplot(2, 2, 3)
-plt.plot(group2['FIC220'], label = 'FIC220')
-plt.plot(group2['FIC201'], label = 'FIC201')
-plt.plot(group2['FIC221'], label = 'FIC221');
-plt.subplot(2, 2, 4)
-plt.plot(group3['FIC220'], label = 'FIC220')
-plt.plot(group3['FIC201'], label = 'FIC201')
-plt.plot(group3['FIC221'], label = 'FIC221')
-plt.legend()
-plt.show()
+
+
+
+
+
+
+
+feature_cols = ['FIC220', 'FIC201', 'FIC221']
+X = lvl1[feature_cols]
+y = lvl1.rateNOx
+
+plt.figure(figsize=(15,7))
+plt.subplot(1, 2, 1)
+plt.plot(lvl1['rateNOx'], label = 'lvl1')
+plt.subplot(1, 2, 2)
+plt.plot(lvl2['rateNOx'], label = 'lvl2')
+
+
+plt.plot(aData['rateNOx'])
+# follow the usual sklearn pattern: import, instantiate, fit
+
+
+
+
+
+
 
 
 plt.plot(betaData['STEAM'])
@@ -210,36 +231,8 @@ plt.plot(aData['FIC221'], label = 'FIC221')
 plt.legend()
 plt.show()
 
-#data preprocessing
-aData = aData.dropna(axis=0)
-aData.isnull().sum()
-len(aData.FIC201)
-aData.FIC201[49998]
 
 
-for i in range(len(aData.FIC201)):
-    if aData.FIC201[i] < 10:
-       aData.FIC201[i] = '0'
-      # print(job[i])
-    else:
-        pass
-    i += 1
-
-for i in range(len(aData.FIC220)):
-    if aData.FIC220[i] < 10:
-       aData.FIC220[i] = '0'
-      # print(job[i])
-    else:
-        pass
-    i += 1
-
-for i in range(len(aData.FIC221)):
-    if aData.FIC221[i] < 10:
-       aData.FIC221[i] = '0'
-      # print(job[i])
-    else:
-        pass
-    i += 1
 
      
 #########################################################
